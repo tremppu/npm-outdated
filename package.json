@@ -1,0 +1,16 @@
+{
+  "name": "npm-outdated",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+    "install-locally": "npm i -g ."
+  },
+  "bin": {
+    "npm-outdated": "./index.js"
+  }
+}
