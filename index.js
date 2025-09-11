@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import { exec } from "child_process";
 
+// Get arguments passed to the script
+const args = process.argv.slice(2);
+
+// If --show-unsafe flag is present, show unsafe packages as well
+const showUnsafe = args.includes("--show-unsafe");
+
 exec("npm outdated --json", async (error, stdout, stderr) => {
   const data = JSON.parse(stdout);
 
@@ -34,4 +40,9 @@ exec("npm outdated --json", async (error, stdout, stderr) => {
     `Found ${outdated.length} outdated packages from which ${unsafeToUpdate.length} are unsafe to update at this point. Safe to update:`
   );
   console.log(safeToUpdate.join(" "));
+
+  if (showUnsafe) {
+    console.log("\nUnsafe to update:");
+    console.log(unsafeToUpdate.join(" "));
+  }
 });
