@@ -7,6 +7,9 @@ const args = process.argv.slice(2);
 // If --show-unsafe flag is present, show unsafe packages as well
 const showUnsafe = args.includes("--show-unsafe");
 
+// If --verbose flag is present, enable verbose logging
+const verbose = args.includes("--verbose");
+
 exec("npm outdated --json", async (error, stdout, stderr) => {
   const data = JSON.parse(stdout);
 
@@ -23,17 +26,23 @@ exec("npm outdated --json", async (error, stdout, stderr) => {
   const unsafeToUpdate = [];
 
   for (const [name, version] of outdated) {
-    const metadata = await fetch(`https://registry.npmjs.org/${name}`).then(
-      (res) => res.json()
-    );
-    const versionTimestamp = metadata.time[version];
-    const versionDate = new Date(versionTimestamp);
-    const diffTime = Math.abs(now - versionDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    try {
+      const metadata = await fetch(`https://registry.npmjs.org/${name}`).then(
+        (res) => res.json()
+      );
+      const versionTimestamp = metadata.time[version];
+      const versionDate = new Date(versionTimestamp);
+      const diffTime = Math.abs(now - versionDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    // If package is at least 2 days old, consider it safe to update
-    if (diffDays >= 2) safeToUpdate.push(`${name}@${version}`);
-    else unsafeToUpdate.push(`${name}@${version}`);
+      // If package is at least 2 days old, consider it safe to update
+      if (diffDays >= 2) safeToUpdate.push(`${name}@${version}`);
+      else unsafeToUpdate.push(`${name}@${version}`);
+    } catch (error) {
+      const message = `Error fetching metadata for ${name}@${version}`;
+      if (verbose) console.error(message, error);
+      else console.error(message);
+    }
   }
 
   console.log(
